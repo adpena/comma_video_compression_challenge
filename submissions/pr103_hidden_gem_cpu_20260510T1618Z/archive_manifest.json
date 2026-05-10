@@ -1,0 +1,169 @@
+{
+  "candidate_archive": {
+    "archive_bytes": 185574,
+    "archive_sha256": "8274e88c0ab1d26a06470a0730d17fe004556afa564460cf1c05624ff6060278",
+    "member_name": "0.bin",
+    "path": "archive.zip",
+    "payload_bytes": 185466,
+    "payload_sha256": "416bd1593acac0da78e9ccbbe880095d73985d5c1c97b30377190d491f6cf3a6",
+    "zip_overhead_bytes": 108
+  },
+  "candidate_id": "pr103_ac_merged_range_drop_u32_at_160824_20260510_agent",
+  "charged_bits_changed": true,
+  "charged_byte_proof": {
+    "candidate_archive_bytes": 185574,
+    "candidate_payload_bytes": 185466,
+    "charged_archive_delta_bytes": -4,
+    "payload_delta_bytes": -4,
+    "rate_component_delta_if_distortion_unchanged": -2.6634358124886856e-06,
+    "rate_component_delta_tag": "[predicted_rate_only_no_score_claim]",
+    "source_archive_bytes": 185578,
+    "source_payload_bytes": 185470,
+    "zip_overhead_delta_bytes": 0,
+    "zip_overhead_new_bytes": 108,
+    "zip_overhead_old_bytes": 108
+  },
+  "contest_cuda_auth_eval": false,
+  "dispatch_attempted": false,
+  "exact_auth_eval_performed": false,
+  "files": {
+    "archive": {
+      "bytes": 185574,
+      "mode": "0644",
+      "path": "archive.zip",
+      "sha256": "8274e88c0ab1d26a06470a0730d17fe004556afa564460cf1c05624ff6060278"
+    },
+    "inflate_py": {
+      "bytes": 20654,
+      "mode": "0644",
+      "path": "inflate.py",
+      "sha256": "5552c2edace5b664f63457802170929d6a8228f1e02a193c1d8975238f5dd4c4"
+    },
+    "inflate_sh": {
+      "bytes": 1323,
+      "mode": "0755",
+      "path": "inflate.sh",
+      "sha256": "68bda32cfabb30519469d8eba97e0a5dc223cd4021990c03e534acc93b1f9494"
+    },
+    "report": {
+      "bytes": 90,
+      "mode": "0644",
+      "path": "report.txt",
+      "sha256": "0fcb5e8c85e962e7712a745d4f2ffa8c6cc214e3959f32ca10bce9f9a30e3472"
+    }
+  },
+  "lane_id": "pr103_ac_hidden_gem",
+  "ready_for_exact_eval_dispatch": false,
+  "remaining_for_score_or_dispatch": [
+    "active_level2_lane_dispatch_claim",
+    "exact_cuda_auth_eval",
+    "contest_auth_eval_adjudication",
+    "operator_score_claim_review"
+  ],
+  "runtime_consumption_no_op_proof": {
+    "changed_element_count": 12611,
+    "changed_tensor_count": 3,
+    "changed_tensors": [
+      {
+        "changed_elements": 1335,
+        "max_abs_diff": 0.41473388671875,
+        "name": "blocks.4.weight",
+        "shape": [
+          72,
+          20,
+          3,
+          3
+        ],
+        "sum_abs_diff": 130.900390625
+      },
+      {
+        "changed_elements": 11267,
+        "max_abs_diff": 0.82373046875,
+        "name": "blocks.5.weight",
+        "shape": [
+          72,
+          18,
+          3,
+          3
+        ],
+        "sum_abs_diff": 1693.1585693359375
+      },
+      {
+        "changed_elements": 9,
+        "max_abs_diff": 0.7563133239746094,
+        "name": "refine.0.bias",
+        "shape": [
+          9
+        ],
+        "sum_abs_diff": 2.5609817504882812
+      }
+    ],
+    "generated_runtime_matches_tac_closure_decode": true,
+    "inflate_sh_bash_n_returncode": 0,
+    "inflate_sh_bash_n_stderr": "",
+    "latents_exact_vs_source": true,
+    "latents_max_abs_diff_vs_source": 0.0,
+    "max_state_dict_abs_diff_vs_source": 0.82373046875,
+    "not_cosmetic_zip_repack": true,
+    "not_provenance_only": true,
+    "parsed_by_generated_runtime_adapter": true,
+    "parsed_by_tac_closure": true,
+    "runtime_consumption_rationale": "The removed bytes lie inside the scorecard target slice and the runtime-consumed merged_ac range stream; generated runtime and tac closure both decode the candidate, and three decoded tensors differ while latents stay exact.",
+    "runtime_dependency_check_returncode": 0,
+    "runtime_dependency_check_stderr": "",
+    "runtime_dependency_check_stdout": "[pr103-pr106-final] dependency check brotli=1.2.0 constriction=0.4.2 numpy=2.4.4 torch=2.11.0",
+    "runtime_static_scan_forbidden_markers": [],
+    "state_dict_changed_vs_source": true,
+    "sum_abs_diff_vs_source": 1826.6199417114258
+  },
+  "schema": "pr103_hidden_gem_release_surface_manifest_v1",
+  "score_affecting_payload_changed": true,
+  "score_claim": false,
+  "section_sha256_proof": {
+    "runtime_consumed_section_changed": true,
+    "runtime_consumed_section_new": {
+      "bytes": 161376,
+      "name": "runtime_merged_ac",
+      "payload_end": 169617,
+      "payload_start": 8241,
+      "sha256": "5c2cdbc730f7a801c144c46a74f51c99fda972c5eb61c4029ccb32fe232e3f06"
+    },
+    "runtime_consumed_section_old": {
+      "bytes": 161380,
+      "name": "runtime_merged_ac",
+      "payload_end": 169621,
+      "payload_start": 8241,
+      "sha256": "1ad4e883ac8fef97af7f07d24aff790e5fd2d52cb05f5a4ee3a58e4e4b7b315c"
+    },
+    "scorecard_profile_section_changed": true,
+    "scorecard_profile_section_new": {
+      "bytes": 153856,
+      "name": "merged_range_coded_weights_and_hi_latents",
+      "note": "same scorecard fixed offset/length slice after one 4-byte removal inside the slice; downstream bytes shift left",
+      "profile_end": 161904,
+      "profile_start": 8048,
+      "sha256": "d567b618e7a83cf2651fef12deac7011632aab1f85a5449fe296a337ed0d8ed4"
+    },
+    "scorecard_profile_section_old": {
+      "bytes": 153856,
+      "entropy_bits_per_byte": 7.998668,
+      "name": "merged_range_coded_weights_and_hi_latents",
+      "profile_end": 161904,
+      "profile_start": 8048,
+      "sha256": "11e9614692d36a07db05787f6153d1640f480d1fd896eb4019628adee3f8371b"
+    }
+  },
+  "source_archive": {
+    "archive_bytes": 185578,
+    "archive_sha256": "ec0890c2d2317dcad903ed37ffddb2794cd19c1df9effa057cb7f05af205e1ce",
+    "member_name": "0.bin",
+    "path": "experiments/results/lightning_batch/pr103_pr106_ac_repack_exact_eval_t4_20260507T181300Z/archive.zip",
+    "payload_bytes": 185470,
+    "payload_sha256": "3272ec95a2ea5ec68feb1a53fa53f6b14bdae3883fac38ee2261cdadb1b16357",
+    "zip_overhead_bytes": 108
+  },
+  "source_manifest": "experiments/results/hnerv_hidden_gem_pr103_ac_candidate_20260510_agent/manifest.json",
+  "source_runtime_dir": "experiments/results/hnerv_hidden_gem_pr103_ac_candidate_20260510_agent/runtime",
+  "submission_dir": "experiments/results/hnerv_hidden_gem_pr103_ac_candidate_20260510_agent/release_surface",
+  "tool": "tools/build_pr103_hidden_gem_release_surface.py"
+}
