@@ -1,0 +1,20 @@
+{
+  "archive_bytes": 178316,
+  "archive_path": "archive.zip",
+  "archive_sha256": "c7f3d88e1ad23bf8cda987583e702ac57e293b64bc7bfea77902e835d19cea10",
+  "created_at_utc": "2026-05-10T05:30:03Z",
+  "evidence_grade": "[predicted; local sidecar packet custody only; no auth eval]",
+  "members": [
+    {
+      "compress_size": 178216,
+      "crc": 729642889,
+      "file_size": 178216,
+      "name": "x",
+      "sha256": "6574ebfcc5a665e66e02aeaed77e4177764cd6c3e2606f4b160d457497c1160f"
+    }
+  ],
+  "runtime_tree_sha256": "3497c774d94fe202563bccba2af4a5f90925cb8d9b2e982cf4428d0efbea0190",
+  "schema_version": "a1_sidecar_archive_manifest_v1",
+  "score_claim": false,
+  "sidecar_manifest_path": "../sidecar_manifest.json"
+}
