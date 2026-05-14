@@ -110,7 +110,10 @@ def decode_packed_decoder(data):
     try:
         raw = brotli.decompress(data)
     except brotli.error as legacy_error:
-        raw = decode_pr101_schema_decoder_raw(data, legacy_error=legacy_error)
+        if data[:4] in (b"HDM3", b"HDM4"):
+            raw = decode_hdm_decoder_raw(data)
+        else:
+            raw = decode_pr101_schema_decoder_raw(data, legacy_error=legacy_error)
     return decode_packed_decoder_raw(raw)
 
 
@@ -186,6 +189,114 @@ def decode_pr101_schema_decoder_raw(data, *, legacy_error=None):
     return b"".join(raw_parts + scale_parts)
 
 
+def decode_hdm_decoder_raw(data):
+    """Decode HDM3/HDM4 fixed-schema q-Brotli/raw-scale decoder bytes.
+
+    HDM3 and HDM4 are lossless section recodes for the same packed HNeRV
+    decoder contract. Unknown or malformed HDM bytes fail closed.
+    """
+    if data[:4] == b"HDM3":
+        return decode_hdm3_decoder_raw(data)
+    if data[:4] == b"HDM4":
+        return decode_hdm4_decoder_raw(data)
+    raise ValueError("invalid HDM decoder magic")
+
+
+def decode_hdm3_decoder_raw(data):
+    """Decode HDM3 fixed-schema q-Brotli/raw-scale decoder bytes."""
+    if data[:4] != b"HDM3":
+        raise ValueError("invalid HDM3 decoder magic")
+    cursor = 4
+    compressed_len = int.from_bytes(
+        read_exact(data, cursor, 3, "HDM3 q_brotli_len24"),
+        "little",
+    )
+    cursor += 3
+    compressed = read_exact(data, cursor, compressed_len, "HDM3 q_brotli")
+    cursor += compressed_len
+    scale_len = 4 * len(PACKED_STATE_SCHEMA)
+    scale_stream = read_exact(data, cursor, scale_len, "HDM3 scale_stream")
+    cursor += scale_len
+    if cursor != len(data):
+        raise ValueError("HDM3 decoder has trailing bytes")
+    try:
+        q_stream = brotli.decompress(compressed)
+    except brotli.error as exc:
+        raise ValueError(f"HDM3 q stream brotli decode failed: {exc}") from exc
+    expected_q_len = sum(int(np.prod(shape)) for _, shape in PACKED_STATE_SCHEMA)
+    if len(q_stream) != expected_q_len:
+        raise ValueError("HDM3 q stream length mismatch")
+    return q_stream + scale_stream
+
+
+def decode_hdm4_decoder_raw(data):
+    """Decode HDM4 fixed-recipe split q-Brotli/raw-scale decoder bytes."""
+    if data[:4] != b"HDM4":
+        raise ValueError("invalid HDM4 decoder magic")
+    cursor = 4
+    recipe_id = read_exact(data, cursor, 1, "HDM4 recipe_id")[0]
+    cursor += 1
+    if recipe_id != 1:
+        raise ValueError(f"unsupported HDM4 recipe id: {recipe_id}")
+    split_points = (6, 9, 26, 28)
+    lengths = []
+    for index in range(len(split_points)):
+        lengths.append(
+            int.from_bytes(
+                read_exact(data, cursor, 3, f"HDM4 q_brotli_len24_{index}"),
+                "little",
+            )
+        )
+        cursor += 3
+    chunks = []
+    for index, length in enumerate(lengths):
+        compressed = read_exact(data, cursor, length, f"HDM4 q_brotli_{index}")
+        cursor += length
+        try:
+            chunks.append(brotli.decompress(compressed))
+        except brotli.error as exc:
+            raise ValueError(f"HDM4 q stream chunk {index} brotli decode failed: {exc}") from exc
+    scale_len = 4 * len(PACKED_STATE_SCHEMA)
+    scale_stream = read_exact(data, cursor, scale_len, "HDM4 scale_stream")
+    cursor += scale_len
+    if cursor != len(data):
+        raise ValueError("HDM4 decoder has trailing bytes")
+
+    ordered_schema = sorted(
+        PACKED_STATE_SCHEMA,
+        key=lambda item: (
+            0 if len(item[1]) == 4 and item[1][2:] == (3, 3)
+            else 1 if len(item[1]) == 4
+            else 2 if item[0].endswith(".bias")
+            else 3,
+            -int(np.prod(item[1])),
+            item[0],
+        ),
+    )
+    records_by_name = {}
+    split_start = 0
+    for chunk, split_end in zip(chunks, split_points):
+        schema_slice = ordered_schema[split_start:split_end]
+        expected = sum(int(np.prod(shape)) for _, shape in schema_slice)
+        if len(chunk) != expected:
+            raise ValueError("HDM4 q chunk length mismatch")
+        q_cursor = 0
+        for name, shape in schema_slice:
+            value_count = int(np.prod(shape))
+            records_by_name[name] = chunk[q_cursor:q_cursor + value_count]
+            q_cursor += value_count
+        split_start = split_end
+    if len(records_by_name) != len(PACKED_STATE_SCHEMA):
+        raise ValueError("HDM4 decoded record count mismatch")
+    raw_parts = []
+    for name, shape in PACKED_STATE_SCHEMA:
+        q = records_by_name.get(name)
+        if q is None or len(q) != int(np.prod(shape)):
+            raise ValueError(f"HDM4 decoded schema mismatch for {name}")
+        raw_parts.append(q)
+    return b"".join(raw_parts) + scale_stream
+
+
 def decompress_concatenated_brotli_streams(payload, n_streams):
     outputs = []
     cursor = 0
@@ -227,7 +338,7 @@ def read_exact(payload, cursor, size, label):
 
 def decode_fixed_latents(data):
     """Decode fixed 600x28 latent payload."""
-    raw = brotli.decompress(data)
+    raw = decode_fixed_latents_raw(data)
     n, d = 600, 28
     meta_len = d * 4
     total = n * d
@@ -244,6 +355,75 @@ def decode_fixed_latents(data):
         q[i] = q[i - 1] + delta[i]
     q = q.astype(np.uint8)
     return torch.from_numpy(q.astype(np.float32)) * scales.unsqueeze(0) + mins.unsqueeze(0)
+
+
+def decode_fixed_latents_raw(data):
+    """Decode legacy Brotli or HLM1 fixed-latent bytes to raw layout."""
+    if data[:4] == b"HLM1":
+        return decode_hlm1_fixed_latents_raw(data)
+    raw = brotli.decompress(data)
+    if len(raw) != 600 * 28 * 2 + 28 * 4:
+        raise ValueError("bad fixed latent raw payload")
+    return raw
+
+
+def decode_hlm1_fixed_latents_raw(data):
+    """Decode HLM1 sparse high-byte fixed-latent bytes."""
+    if data[:4] != b"HLM1":
+        raise ValueError("invalid HLM1 fixed-latent magic")
+    n, d = 600, 28
+    total = n * d
+    meta_len = d * 4
+    cursor = 4
+    lo_len = int.from_bytes(read_exact(data, cursor, 2, "HLM1 lo_brotli_len"), "little")
+    cursor += 2
+    hi_delta_len = int.from_bytes(read_exact(data, cursor, 2, "HLM1 hi_delta_len"), "little")
+    cursor += 2
+    hi_count = int.from_bytes(read_exact(data, cursor, 2, "HLM1 hi_count"), "little")
+    cursor += 2
+    lo_brotli = read_exact(data, cursor, lo_len, "HLM1 lo_brotli")
+    cursor += lo_len
+    meta = read_exact(data, cursor, meta_len, "HLM1 meta")
+    cursor += meta_len
+    hi_delta = read_exact(data, cursor, hi_delta_len, "HLM1 hi_delta")
+    cursor += hi_delta_len
+    if cursor != len(data):
+        raise ValueError("HLM1 fixed-latent payload has trailing bytes")
+    try:
+        lo = brotli.decompress(lo_brotli)
+    except brotli.error as exc:
+        raise ValueError(f"HLM1 lo Brotli decode failed: {exc}") from exc
+    if len(lo) != total:
+        raise ValueError("HLM1 lo stream length mismatch")
+    hi = decode_hlm1_hi_delta_positions(hi_delta, hi_count, total)
+    return lo + meta + hi
+
+
+def decode_hlm1_hi_delta_positions(payload, count, total):
+    hi = bytearray(total)
+    cursor = 0
+    pos = -1
+    for _ in range(count):
+        if cursor >= len(payload):
+            raise ValueError("truncated HLM1 hi delta stream")
+        marker = payload[cursor]
+        cursor += 1
+        if marker == 255:
+            delta = int.from_bytes(read_exact(payload, cursor, 2, "HLM1 hi extended delta"), "little")
+            cursor += 2
+            if delta <= 254:
+                raise ValueError("non-canonical HLM1 extended delta")
+        else:
+            delta = int(marker)
+        if delta <= 0:
+            raise ValueError("HLM1 hi delta must be positive")
+        pos += delta
+        if pos >= total:
+            raise ValueError("HLM1 hi position out of range")
+        hi[pos] = 1
+    if cursor != len(payload):
+        raise ValueError("HLM1 hi delta stream has trailing bytes")
+    return bytes(hi)
 
 
 def parse_fixed_archive(archive_bytes):
