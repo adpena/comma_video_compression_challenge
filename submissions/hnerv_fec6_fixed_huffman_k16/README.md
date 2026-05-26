@@ -2,7 +2,7 @@
 
 # hnerv_fec6_fixed_huffman_k16
 
-Per-frame transform selector bolt-on over PR [#101](https://github.com/commaai/comma_video_compression_challenge/pull/101)
+Per-pair perturbation selector bolt-on over PR [#101](https://github.com/commaai/comma_video_compression_challenge/pull/101)
 `hnerv_ft_microcodec`. Decoder weights byte-identical to PR
 [#95](https://github.com/commaai/comma_video_compression_challenge/pull/95).
 No new training was performed.
