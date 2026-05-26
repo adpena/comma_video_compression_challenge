@@ -11,7 +11,7 @@ archive plus a precomputed per-frame scorer-sweep.
 | File | Role |
 |---|---|
 | `frame_exploit_segnet_posenet_sweep.py` | Offline sweep tool. For each of 31 candidate per-frame transforms, runs the transformed pair through the upstream `SegNet` and `PoseNet` scorers and writes per-frame component deltas (Δseg, Δpose) to an artifact directory. |
-| `build_pr101_frame_exploit_selector_packet.py` | The encoder. Selects K=16 modes from the sweep table (`--selector-policy-mode compact_exact_k16`), Huffman-codes the per-frame indices against a fixed K=16 codebook (`--compact-selector-codec fec6`), and emits the rebuilt submission tree (`archive.zip` + `inflate.sh` + runtime). |
+| `build_pr101_frame_exploit_selector_packet.py` | The encoder. Selects K=16 modes from the sweep table (`--selector-policy-mode compact_exact_k16`), Huffman-codes the per-pair indices against a fixed K=16 codebook (`--compact-selector-codec fec6`), and emits the rebuilt submission tree (`archive.zip` + `inflate.sh` + runtime). |
 | `_score_geometry.py` | Stdlib-only vendored slice of the canonical contest-score helper. Two symbols: `CONTEST_REFERENCE_BYTES = 37_545_489` + `contest_score(d_seg, d_pose, archive_bytes)`. Used by the sweep tool to rank candidate modes; reviewers can verify it line-by-line against the upstream rate term. |
 | `tool_bootstrap.py` | Stdlib-only path helper. |
 
@@ -25,7 +25,7 @@ archive plus a precomputed per-frame scorer-sweep.
 ## Reproduce
 
 ```bash
-# 1) Offline sweep (CUDA or MPS). Writes per-frame Δseg/Δpose tables.
+# 1) Offline sweep (macOS CPU local; CUDA or MPS optional). Writes per-frame Δseg/Δpose tables.
 python3 encoder/frame_exploit_segnet_posenet_sweep.py \
     --archive /path/to/pr101/archive.zip \
     --source-runtime /path/to/pr101/submissions/hnerv_ft_microcodec \
@@ -56,7 +56,7 @@ transmitted in the archive.
 Member `x` of the ZIP has the grammar
 `FP11 | u32 source_len | source_pr101_payload | u16 selector_len | selector_payload`.
 PR #101's payload is read verbatim from `source_pr101_payload`. The
-`selector_payload` is the Huffman-coded sequence of per-frame mode indices over
+`selector_payload` is the Huffman-coded sequence of per-pair mode indices over
 the K=16 alphabet; the decoder (`src/frame_selector.py`) decodes it against the
 fixed codebook and dispatches the corresponding inverse transform at
 reconstruct time. Delta versus PR #101's archive: +259 bytes; score delta:
