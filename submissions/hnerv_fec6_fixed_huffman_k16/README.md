@@ -47,7 +47,7 @@ shasum -a 256 $TMPDIR/out/0.raw
 | `inflate.sh`, `inflate.py` | Contest-runtime decoder. |
 | `src/model.py` | HNeRV decoder (byte-identical to PR #95). |
 | `src/codec.py`, `src/codec_sidecar.py` | PR #101 source-payload parsing (reused unchanged). |
-| `src/frame_selector.py` | FEC6 K=16 fixed-Huffman per-frame selector (new). |
+| `src/frame_selector.py` | FEC6 K=16 fixed-Huffman per-pair selector (new). |
 | `encoder/` | Offline sweep + packet builder. |
 | `requirements.txt` | Inflate-time runtime dependencies. |
 | `expected_output.sha256` | Canonical CPU decode SHA for byte-stability verification. |
