@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Latent sidecar decoding helpers for the FEC6 PR101 packet."""
 
 from functools import lru_cache

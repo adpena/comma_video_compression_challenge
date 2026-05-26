@@ -1,9 +1,14 @@
+# SPDX-License-Identifier: MIT
 """HNeRV-style decoder: 229K params, single-video memorization.
 
 Per-frame-pair latent (28-d) -> 6 upsample stages -> 384x512 RGB pair.
 
 Each stage: Conv(in, out*4, 3x3) + PixelShuffle(2) + bilinear-skip + sin().
 Final: dilated-conv refine residual + sigmoid RGB heads (separate frame 0 and 1).
+
+Byte-identical to the HNeRV decoder published in PR #95 by @AaronLeslie138
+(https://github.com/commaai/comma_video_compression_challenge/pull/95).
+Reused unmodified; this submission performed no new training of the decoder.
 """
 import torch
 import torch.nn as nn

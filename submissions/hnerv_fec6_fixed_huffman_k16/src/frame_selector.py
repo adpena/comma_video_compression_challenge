@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Frame-exploit selector grammar and deterministic frame-0 transforms."""
 
 from __future__ import annotations

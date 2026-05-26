@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Compact inflater-side codec for the PR #101 HNeRV-microcodec source payload.
 
 This stores the fixed model schema in code and keeps all video-specific payload

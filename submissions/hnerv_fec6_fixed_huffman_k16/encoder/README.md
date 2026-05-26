@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: MIT -->
+
 # Encoder
 
 This directory contains the offline pipeline that produces this submission's
@@ -15,7 +17,8 @@ archive plus a precomputed per-frame scorer-sweep.
 
 ## Inputs (not bundled)
 
-- **PR #101 archive**: fetch from the PR #101 release.
+- **PR #101 archive**: fetch from the PR #101 release. Expected SHA-256:
+  `b83bf3488625dbd73adeddff91712994197ab53098e578e91327a0c6e49efb3e`.
 - **PR #101 source runtime**: `submissions/hnerv_ft_microcodec/` from the PR #101 source tree.
 - **Upstream contest repo**: `evaluate.py`, `modules.py`, and `videos/0.mkv` from the contest root for the sweep step.
 
@@ -27,15 +30,15 @@ python3 encoder/frame_exploit_segnet_posenet_sweep.py \
     --archive /path/to/pr101/archive.zip \
     --source-runtime /path/to/pr101/submissions/hnerv_ft_microcodec \
     --upstream /path/to/comma_video_compression_challenge \
-    --output-dir /tmp/fec6_sweep_artifact
+    --output-dir $TMPDIR/fec6_sweep_artifact
 
 # 2) Selector pack. Reads the sweep table, selects K=16 modes, packs into a
 #    rebuilt submission tree alongside this directory.
 python3 encoder/build_pr101_frame_exploit_selector_packet.py \
-    --artifact-dir /tmp/fec6_sweep_artifact \
+    --artifact-dir $TMPDIR/fec6_sweep_artifact \
     --archive /path/to/pr101/archive.zip \
     --source-runtime /path/to/pr101/submissions/hnerv_ft_microcodec \
-    --output-dir /tmp/fec6_rebuild \
+    --output-dir $TMPDIR/fec6_rebuild \
     --selector-policy-mode compact_exact_k16 \
     --compact-selector-codec fec6
 
