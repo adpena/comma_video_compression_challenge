@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
-"""Bootstrap helpers for repository-local tools.
+"""Bootstrap helpers for bundled encoder tools.
 
-Root-level tools should not each hand-roll repo-root discovery and `sys.path`
-mutation. Keep this file dependency-light so it can be imported before the
-package itself is importable.
+Encoder scripts should not each hand-roll submission-root discovery and
+`sys.path` mutation. Keep this file dependency-light so it can be imported
+before the bundled runtime package itself is importable.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 def repo_root_from_tool(path: str | Path) -> Path:
-    """Return the repository root for a file under ``tools/``."""
+    """Return the submission root for a file under ``encoder/``."""
 
     return Path(path).resolve().parents[1]
 

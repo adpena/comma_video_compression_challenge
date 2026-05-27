@@ -33,6 +33,7 @@ archive plus a precomputed per-frame scorer-sweep.
 python3 encoder/frame_exploit_segnet_posenet_sweep.py \
     --candidate-raw /path/to/pr101/inflated/0.raw \
     --gt-video /path/to/comma_video_compression_challenge/videos/0.mkv \
+    --upstream /path/to/comma_video_compression_challenge \
     --baseline-json /path/to/pr101/contest_auth_eval.json \
     --output-dir $TMPDIR/fec6_sweep_artifact
 
@@ -41,6 +42,7 @@ python3 encoder/frame_exploit_segnet_posenet_sweep.py \
 python3 encoder/frame_exploit_segnet_posenet_sweep.py \
     --candidate-raw /path/to/pr101/inflated/0.raw \
     --gt-video /path/to/comma_video_compression_challenge/videos/0.mkv \
+    --upstream /path/to/comma_video_compression_challenge \
     --baseline-json /path/to/pr101/contest_auth_eval.json \
     --pair-indices 502,2,546,515,540,379,535,558,507,581,504,372,320,79,409,410 \
     --n-pairs 16 \
